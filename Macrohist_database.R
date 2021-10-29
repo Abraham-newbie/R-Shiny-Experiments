@@ -19,57 +19,48 @@ install.packages("hrbrthemes")
 library(hrbrthemes)
 library(lubridate)
 
-library(scales)
-
-###Datacleanin
-
-
-
-l <- lapply(org_data, attr, "label") # Gives you list of the labeled variables
-
-org_data %>%  map_dfc(attr, "label")
-
 org_data<- read_dta("C:/Users/abrah/Desktop/R-Shiny-Experiments/JSTdatasetR5.dta")
 
 mydata<-org_data
-mydata %>% sapply(function(x) sum(is.na(x)))
+
+
 vars<-colnames(mydata)
 countries<-unique(mydata$country)
+
+
 for (var in vars){
   #mydata %<>% group_by(country) %>% filter(any(!is.na(!!var)))
   mydata %<>% arrange(country,year) %>% dplyr::group_by(country) %>% tidyr::fill((!!var),.direction="down")
 }
 
-mydata$year_org <-mydata$year
 
 
-mydata %>% sapply(function(x) sum(is.na(x)))
-library(zoo)
+#install.packages("papeR")
+#library("papeR")
+#l<-labels(org_data)
+#l<-c(l)
+#mydata<-set_labels(mydata,labels=l)
+
+
+mydata$year_org=mydata$year
 mydata$year  <- as.Date(as.character(mydata$year), format = "%Y") 
-
-
 mydata <- mydata%>% mutate(exp_ss=expenditure/(xrusd*1000000))
 mydata $exp_ss <- ifelse(mydata$country %in% c('USA'),mydata$exp_ss*1000, mydata$exp_ss)
 
 
-
-
-
-countries <- c("Sweden","Belgium","Norway","Finland")
 year1=2000
-year2=2020
+year2=2010
+data<-mydata%>% filter(country %in%countries ) %>% mutate(label = if_else(year == max(year), as.character(country), NA_character_)) %>%filter(year_org>=year1 &year_org<=year2)
+countries= c("Sweden","Belgium","Norway","Finland")
+var="pop"
 
-var="exp_ss"
-
-
-line_plot<-function(var="pop",years=c(2000,2020),year1=2000,year2=2015,countries= c("Sweden","Belgium","Norway","Finland")){
+line_plot<-function(var="rgdpmad",year1=1950,year2=2020,countries= c("Sweden","Belgium","Norway","Finland")){
   
   windowsFonts("Arial" = windowsFont("Arial"))
-  year1=years[1]
-  year2=years[2]
   
-  data<-mydata%>% filter(country %in%countries ) %>% mutate(label = if_else(year == max(year), as.character(country), NA_character_)) %>%filter(year_org>=year1 &year_org<=year2)
-  data$label
+  
+  data<-mydata%>% filter(country %in%countries ) %>%filter(year_org>=year1 &year_org<=year2)%>% mutate(label = if_else(year == max(year), as.character(country), NA_character_)) 
+
   
   
   
@@ -90,7 +81,7 @@ line_plot<-function(var="pop",years=c(2000,2020),year1=2000,year2=2015,countries
   
   options(ggrepel.max.overlaps = Inf)
   library(ggrepel)
-  GO1+  
+  GO1 +  
     geom_text_repel(data = . %>% filter(!is.na(label)),
                     aes(label = paste0("  ", label),
                         segment.curvature = -0.1,
@@ -98,15 +89,13 @@ line_plot<-function(var="pop",years=c(2000,2020),year1=2000,year2=2015,countries
                         force             = 0.5,
                         
                         
-                    ))
-  
-  
-  
+                   ))
+
 }
 
 
 
-line_plot(var="pop")
+line_plot(year1=1900,year2=2015)
 
 
 
@@ -141,5 +130,5 @@ server <- function(input, output, session) {
 }
 shinyApp(ui, server)
 
-
+input$years[1]
 line_plot()
