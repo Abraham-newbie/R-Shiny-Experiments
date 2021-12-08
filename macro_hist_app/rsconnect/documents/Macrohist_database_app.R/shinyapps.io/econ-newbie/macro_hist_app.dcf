@@ -1,0 +1,13 @@
+name: macro_hist_app
+title: macro_hist_app
+username:
+account: econ-newbie
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 5293528
+bundleId: 5347014
+url: https://econ-newbie.shinyapps.io/macro_hist_app/
+when: 1638995319.13742
+lastSyncTime: 1638995319.13742
+asMultiple: FALSE
+asStatic: FALSE
